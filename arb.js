@@ -46,9 +46,23 @@ fs.readFile('test.html', 'utf-8', (err, data) => {
     for (const match of bookMakerMatches) {
 
         const teamnames = getMatchNames(match);
-        const teamodds = getMatchOdds(match);
+        const matchodds = getMatchOdds(match);
+        console.log(teamnames['first'], ' vs ', teamnames['second']);
 
+        for (const firstBookmaker of matchodds.bookmakers) {
+            for (const secondBookmaker of matchodds.bookmakers) {
+                const firstOdd = matchodds['first'][firstBookmaker];
+                const secondOdd = matchodds['second'][secondBookmaker];
+                if (isBetProfitable(firstOdd, secondOdd)) {
+                    console.log(firstBookmaker, ': ', firstOdd);
+                    console.log(secondBookmaker, ': ', secondOdd);
+                    console.log(betRatio(firstOdd, secondOdd));
+                }
+            }
         }
+
+
+    }
 });
 
 
@@ -61,6 +75,7 @@ function getTeamOdds(teamrow) {
     let odds = {};
     for (const key in bmClass) {
         const odd = teamrow.querySelector(bmClass[key]);
+        // If a bookmaker doesnt offer a bet on the match odd will be null.
         if (odd != null) {
             Object.defineProperty(odds, key, {value: odd.innerHTML, enumerable: true});
         }
@@ -79,7 +94,15 @@ function getMatchNames(match) {
 function getMatchOdds(match) {
     return {
         first: getTeamOdds(match.children[0]),
-        second: getTeamOdds(match.children[1])
-    }
-    
+        second: getTeamOdds(match.children[1]),
+        bookmakers: Object.keys(getTeamOdds(match.children[0]))
+    }   
+}
+
+function isBetProfitable(oddOne, oddTwo) {
+    return ((1/oddOne + 1/oddTwo) < 1);
+}
+
+function betRatio(oddOne, oddTwo) {
+    return oddOne/oddTwo;
 }
