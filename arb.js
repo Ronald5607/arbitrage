@@ -47,19 +47,10 @@ fs.readFile('test.html', 'utf-8', (err, data) => {
 
         const teamnames = getMatchNames(match);
         const matchodds = getMatchOdds(match);
-        console.log(teamnames['first'], ' vs ', teamnames['second']);
 
-        for (const firstBookmaker of matchodds.bookmakers) {
-            for (const secondBookmaker of matchodds.bookmakers) {
-                const firstOdd = matchodds['first'][firstBookmaker];
-                const secondOdd = matchodds['second'][secondBookmaker];
-                if (isBetProfitable(firstOdd, secondOdd)) {
-                    console.log(firstBookmaker, ': ', firstOdd);
-                    console.log(secondBookmaker, ': ', secondOdd);
-                    console.log(betRatio(firstOdd, secondOdd));
-                }
-            }
-        }
+        console.log(checkMatch(matchodds));
+
+        
 
 
     }
@@ -105,4 +96,30 @@ function isBetProfitable(oddOne, oddTwo) {
 
 function betRatio(oddOne, oddTwo) {
     return oddOne/oddTwo;
+}
+
+function checkMatch(matchOdds) {
+
+    const profitableBets = [];
+
+    for (const firstBookmaker of matchOdds.bookmakers) {
+
+        
+
+        for (const secondBookmaker of matchOdds.bookmakers) {
+
+            let betObject = {};
+
+            const firstOdd = matchOdds['first'][firstBookmaker];
+            const secondOdd = matchOdds['second'][secondBookmaker];
+
+            if (isBetProfitable(firstOdd, secondOdd)) {
+
+                Object.defineProperty(betObject, firstBookmaker, {value: firstOdd, enumerable: true});
+                Object.defineProperty(betObject, secondBookmaker, {value: secondOdd, enumerable: true});
+                profitableBets.push(betObject);
+            }
+        }
+    }
+    return profitableBets
 }
